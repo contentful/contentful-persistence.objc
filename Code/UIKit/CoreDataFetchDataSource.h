@@ -12,18 +12,32 @@
 /**
  *  Block which is responsible for configuring the given cell.
  *
- *  @param cell      A table view cell to configure.
+ *  @param cell      A cell to configure.
  *  @param indexPath Index path of the given cell.
  */
-typedef void(^CDAConfigureCellAtIndexPath)(UITableViewCell* cell, NSIndexPath* indexPath);
+typedef void(^CDAConfigureCellAtIndexPath)(id cell, NSIndexPath* indexPath);
 
 /**
- *  A `UITableViewDataSource` which works in conjunction with `CoreDataManager`.
+ *  A flexible data source which works in conjunction with `CoreDataManager`. It can be used for both
+ *  collection, as well as table views.
  */
-@interface CoreDataFetchDataSource : NSObject <UITableViewDataSource>
+@interface CoreDataFetchDataSource : NSObject <UICollectionViewDataSource, UITableViewDataSource>
 
 /** Block responsible for configuring cells. */
 @property (nonatomic, copy) CDAConfigureCellAtIndexPath cellConfigurator;
+
+/**
+ *  Initializes a fetch data source.
+ *
+ *  @param fetchedResultsController The fetch results controller to use as source for data.
+ *  @param collectionView           The collection view in which the data will be displayed.
+ *  @param cellIdentifier           The reuse identifier used for cells in the table view.
+ *
+ *  @return An initialized fetch data source.
+ */
+-(id)initWithFetchedResultsController:(NSFetchedResultsController*)fetchedResultsController
+                       collectionView:(UICollectionView*)collectionView
+                       cellIdentifier:(NSString*)cellIdentifier;
 
 /**
  *  Initializes a fetch data source.
