@@ -1,8 +1,0 @@
-source 'https://github.com/CocoaPods/Specs.git'
-
-
-target 'contentful-persistence.objc', :exclusive => true do
-  pod "contentful-persistence.objc", :path => "../"
-
-  
-end
