@@ -1,28 +1,22 @@
 # contentful-persistence.objc
 
-[![CI Status](http://img.shields.io/travis/Boris Bügling/contentful-persistence.objc.svg?style=flat)](https://travis-ci.org/Boris Bügling/contentful-persistence.objc)
 [![Version](https://img.shields.io/cocoapods/v/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/contentful-persistence.objc)
 [![License](https://img.shields.io/cocoapods/l/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/contentful-persistence.objc)
 [![Platform](https://img.shields.io/cocoapods/p/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/contentful-persistence.objc)
 
-## Usage
+This library simplifies persisting data retrieved from the [Contentful][1] Content Delivery API.
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
-
-## Requirements
+[Contentful][1] is a content management platform for web applications, mobile apps and connected devices. It allows you to create, edit & manage content in the cloud and publish it anywhere via powerful API. Contentful offers tools for managing editorial teams and enabling cooperation between organizations.
 
 ## Installation
 
 contentful-persistence.objc is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
-    pod "contentful-persistence.objc"
-
-## Author
-
-Boris Bügling, boris@icculus.org
+    pod "ContentfulPersistence"
 
 ## License
 
-contentful-persistence.objc is available under the MIT license. See the LICENSE file for more info.
+Copyright (c) 2014 Contentful GmbH. See LICENSE for further details.
 
+[1]: https://www.contentful.com
