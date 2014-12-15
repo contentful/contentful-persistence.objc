@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.author           = { "Boris Bügling" => "boris@contentful.com" }
   s.source           = { :git => "https://github.com/contentful/contentful-persistence.objc.git",
                          :tag => s.version.to_s }
-  s.social_media_url = 'https://twitter.com/contentfulapp'
+  s.social_media_url = 'https://twitter.com/contentful'
 
   s.requires_arc  = true
   s.frameworks    = 'CoreData'
