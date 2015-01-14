@@ -78,6 +78,32 @@
                                          inManagedObjectContext:self.managedObjectContext];
 }
 
+- (void)deleteAll {
+    NSMutableArray* allFetchRequests = [@[] mutableCopy];
+
+    [allFetchRequests addObject:[self fetchRequestForEntititiesOfClass:self.classForAssets
+                                                    matchingPredicate:nil]];
+    [allFetchRequests addObject:[self fetchRequestForEntititiesOfClass:self.classForSpaces
+                                                    matchingPredicate:nil]];
+
+    for (NSString* contentTypeIdentifier in self.identifiersOfHandledContentTypes) {
+        Class c = [self classForEntriesOfContentTypeWithIdentifier:contentTypeIdentifier];
+        NSFetchRequest* r = [self fetchRequestForEntititiesOfClass:c matchingPredicate:nil];
+        [allFetchRequests addObject:r];
+    }
+
+    for (NSFetchRequest* request in allFetchRequests) {
+        [request setIncludesPropertyValues:NO];
+        [request setReturnsObjectsAsFaults:YES];
+
+        for (NSManagedObject* obj in [self.managedObjectContext executeFetchRequest:request error:nil]) {
+            [self.managedObjectContext deleteObject:obj];
+        }
+    }
+
+    [self saveDataStore];
+}
+
 - (void)deleteAssetWithIdentifier:(NSString *)identifier
 {
     id<CDAPersistedAsset> asset = [self fetchAssetWithIdentifier:identifier];
