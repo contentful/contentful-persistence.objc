@@ -14,6 +14,18 @@
 
 #import "CoreDataManager.h"
 
+NSString* EntityNameFromClass(Class class) {
+    NSString* entityName = NSStringFromClass(class);
+
+    if ([entityName rangeOfString:@"."].location != NSNotFound) {
+        NSArray* components = [entityName componentsSeparatedByString:@"."];
+        NSCAssert(components.count == 2, @"Unexpected entity class name: %@", entityName);
+        entityName = components[1];
+    }
+
+    return entityName;
+}
+
 @interface CoreDataManager ()
 
 @property (nonatomic) NSString* dataModelName;
@@ -57,7 +69,7 @@
 - (id<CDAPersistedAsset>)createPersistedAsset
 {
     NSParameterAssert(self.classForAssets);
-    return [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass(self.classForAssets)
+    return [NSEntityDescription insertNewObjectForEntityForName:EntityNameFromClass(self.classForAssets)
                                          inManagedObjectContext:self.managedObjectContext];
 }
 
@@ -67,14 +79,14 @@
     if (!entryClass) {
         return nil;
     }
-    return [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass(entryClass)
+    return [NSEntityDescription insertNewObjectForEntityForName:EntityNameFromClass(entryClass)
                                          inManagedObjectContext:self.managedObjectContext];
 }
 
 - (id<CDAPersistedSpace>)createPersistedSpace
 {
     NSParameterAssert(self.classForSpaces);
-    return [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass(self.classForSpaces)
+    return [NSEntityDescription insertNewObjectForEntityForName:EntityNameFromClass(self.classForSpaces)
                                          inManagedObjectContext:self.managedObjectContext];
 }
 
@@ -125,7 +137,7 @@
 - (void)enumerateRelationshipsForClass:(Class)class usingBlock:(void (^)(NSString* relationshipName))block {
     NSParameterAssert(block);
 
-    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:NSStringFromClass(class) inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
 
     NSArray* relationships = [entityDescription relationshipsByName].allKeys;
     [relationships enumerateObjectsUsingBlock:^(NSString* relationshipName, NSUInteger idx, BOOL *stop) {
@@ -222,7 +234,7 @@
     
     NSManagedObjectContext *moc = [self managedObjectContext];
     NSEntityDescription *entityDescription = [NSEntityDescription
-                                              entityForName:NSStringFromClass(class)
+                                              entityForName:EntityNameFromClass(class)
                                               inManagedObjectContext:moc];
     [request setEntity:entityDescription];
     
@@ -310,13 +322,13 @@
 
 - (NSRelationshipDescription*)relationshipDescriptionForName:(NSString*)relationshipName
                                                  entityClass:(Class)class {
-    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:NSStringFromClass(class) inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
     return entityDescription.relationshipsByName[relationshipName];
 }
 
 - (NSArray *)propertiesForEntriesOfContentTypeWithIdentifier:(NSString *)identifier {
     Class class = [self classForEntriesOfContentTypeWithIdentifier:identifier];
-    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:NSStringFromClass(class) inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
     return [entityDescription.properties valueForKey:@"name"];
 }
 
