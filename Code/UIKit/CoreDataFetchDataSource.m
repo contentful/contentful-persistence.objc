@@ -120,8 +120,6 @@
             self.cellConfigurator([self.collectionView cellForItemAtIndexPath:indexPath], indexPath);
 
             self.cellConfigurator([self.tableView cellForRowAtIndexPath:indexPath], indexPath);
-            [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section]
-                          withRowAnimation:UITableViewRowAnimationAutomatic];
             break;
             
         case NSFetchedResultsChangeMove:
@@ -213,6 +211,27 @@
         self.objectChanges = nil;
         self.sectionChanges = nil;
     }];
+
+    NSMutableArray* sectionWasReloaded = [@[] mutableCopy];
+    for (int i = 0; i < self.fetchedResultsController.sections.count; i++) {
+        [sectionWasReloaded addObject:@(NO)];
+    }
+
+    for (NSDictionary* change in self.objectChanges) {
+        [change enumerateKeysAndObjectsUsingBlock:^(NSNumber* type, id change, BOOL *stop) {
+            NSIndexPath* indexPath = (NSIndexPath*)change;
+
+            switch ((NSFetchedResultsChangeType)type.integerValue) {
+                case NSFetchedResultsChangeUpdate:
+                    if (!sectionWasReloaded[indexPath.section]) {
+                        [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section]
+                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+                        sectionWasReloaded[indexPath.section] = @YES;
+                    }
+                    break;
+            }
+        }];
+    }
 
     [self.tableView endUpdates];
 }
