@@ -11,6 +11,7 @@
 #import <ContentfulDeliveryAPI/CDAAsset.h>
 #import <ContentfulDeliveryAPI/CDAContentType.h>
 #import <ContentfulDeliveryAPI/CDAEntry.h>
+#import <ContentfulDeliveryAPI/CDAField.h>
 
 #import "CoreDataManager.h"
 
@@ -131,6 +132,24 @@ NSString* EntityNameFromClass(Class class) {
     
     if (entry) {
         [self.managedObjectContext deleteObject:entry];
+    }
+}
+
+- (void)enumerateMappedFieldsForContentTypeWithIdentifier:(NSString*)identifier mapping:(NSDictionary*)mapping usingBlock:(void (^)(CDAContentType* contentType, CDAField* field, NSString* keyPath))block {
+    NSParameterAssert(block);
+
+    for (NSString* keyPath in mapping.allKeys) {
+        NSArray* key = [keyPath componentsSeparatedByString:@"."];
+
+        if (key.count != 2 || ![key[0] isEqualToString:@"fields"]) {
+            continue;
+        }
+
+        [self.client fetchContentTypeWithIdentifier:identifier success:^(CDAResponse *response,
+                                                                         CDAContentType *contentType) {
+            CDAField* field = [contentType fieldForIdentifier:key[1]];
+            block(contentType, field, keyPath);
+        } failure:nil];
     }
 }
 
@@ -313,6 +332,30 @@ NSString* EntityNameFromClass(Class class) {
         }
     }];
 
+    [self enumerateMappedFieldsForContentTypeWithIdentifier:identifier mapping:mapping usingBlock:^(CDAContentType *contentType, CDAField *field, NSString *keyPath) {
+        if (field.type == CDAFieldTypeArray) {
+            if (field.itemType == CDAFieldTypeSymbol) {
+                // Handled after the fact in updatePersistedEntry:withEntry:
+                [mapping removeObjectForKey:keyPath];
+            } else {
+                [NSException raise:NSInvalidArgumentException format:@"Invalid mapping: field '%@' of Content Type '%@' is a list, but '%@' is not a relationship.", field.name, contentType.name, mapping[keyPath]];
+            }
+        }
+
+        if (field.type == CDAFieldTypeLink) {
+            [NSException raise:NSInvalidArgumentException format:@"Invalid mapping: field '%@' of Content Type '%@' is a link, but '%@' is not a relationship.", field.name, contentType.name, mapping[keyPath]];
+        }
+    }];
+
+    for (NSString* value in mapping.allValues) {
+        [self.client fetchContentTypeWithIdentifier:identifier success:^(CDAResponse *response,
+                                                                         CDAContentType *contentType) {
+            CDAField* field = [contentType fieldForIdentifier:value];
+
+
+        } failure:nil];
+    }
+
     return mapping;
 }
 
@@ -392,11 +435,26 @@ NSString* EntityNameFromClass(Class class) {
 - (void)updatePersistedEntry:(id<CDAPersistedEntry>)persistedEntry withEntry:(CDAEntry *)entry {
     [super updatePersistedEntry:persistedEntry withEntry:entry];
 
+    NSDictionary* mappingForEntries = [super mappingForEntriesOfContentTypeWithIdentifier:entry.contentType.identifier];
+    [self enumerateMappedFieldsForContentTypeWithIdentifier:entry.contentType.identifier mapping:mappingForEntries usingBlock:^(CDAContentType *contentType, CDAField *field, NSString *keyPath) {
+        if (field.type == CDAFieldTypeArray && field.itemType == CDAFieldTypeSymbol) {
+            NSString* key = mappingForEntries[keyPath];
+            NSAttributeDescription* attributeDescription = [self entityDescriptionForClass:persistedEntry.class].attributesByName[key];
+
+            if (attributeDescription.attributeType != NSBinaryDataAttributeType) {
+                [NSException raise:NSInvalidArgumentException format:@"Invalid Core Data model: %@ needs to be of NSBinaryDataAttributeType."];
+            }
+
+            NSArray* symbolArray = entry.fields[field.identifier];
+            NSData* symbolArrayAsData = [NSKeyedArchiver archivedDataWithRootObject:symbolArray];
+            [(NSObject*)persistedEntry setValue:symbolArrayAsData forKey:key];
+        }
+    }];
+
     NSMutableDictionary* relationships = [@{} mutableCopy];
 
     [self enumerateRelationshipsForClass:persistedEntry.class usingBlock:^(NSString *relationshipName) {
 		NSRelationshipDescription* description = [self relationshipDescriptionForName:relationshipName entityClass:persistedEntry.class];
-        NSDictionary* mappingForEntries = [super mappingForEntriesOfContentTypeWithIdentifier:entry.contentType.identifier];
         NSString* entryKeyPath = [[mappingForEntries allKeysForObject:relationshipName] firstObject];
 
         if (!entryKeyPath) {
