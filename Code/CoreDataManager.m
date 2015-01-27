@@ -137,12 +137,16 @@ NSString* EntityNameFromClass(Class class) {
 - (void)enumerateRelationshipsForClass:(Class)class usingBlock:(void (^)(NSString* relationshipName))block {
     NSParameterAssert(block);
 
-    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription* entityDescription = [self entityDescriptionForClass:class];
 
     NSArray* relationships = [entityDescription relationshipsByName].allKeys;
     [relationships enumerateObjectsUsingBlock:^(NSString* relationshipName, NSUInteger idx, BOOL *stop) {
         block(relationshipName);
     }];
+}
+
+- (NSEntityDescription*)entityDescriptionForClass:(Class)class {
+    return [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
 }
 
 - (NSArray *)fetchAssetsFromDataStore
@@ -233,9 +237,7 @@ NSString* EntityNameFromClass(Class class) {
     NSFetchRequest *request = [NSFetchRequest new];
     
     NSManagedObjectContext *moc = [self managedObjectContext];
-    NSEntityDescription *entityDescription = [NSEntityDescription
-                                              entityForName:EntityNameFromClass(class)
-                                              inManagedObjectContext:moc];
+    NSEntityDescription *entityDescription = [self entityDescriptionForClass:class];
     [request setEntity:entityDescription];
     
     if (predicateString) {
@@ -322,13 +324,13 @@ NSString* EntityNameFromClass(Class class) {
 
 - (NSRelationshipDescription*)relationshipDescriptionForName:(NSString*)relationshipName
                                                  entityClass:(Class)class {
-    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription* entityDescription = [self entityDescriptionForClass:class];
     return entityDescription.relationshipsByName[relationshipName];
 }
 
 - (NSArray *)propertiesForEntriesOfContentTypeWithIdentifier:(NSString *)identifier {
     Class class = [self classForEntriesOfContentTypeWithIdentifier:identifier];
-    NSEntityDescription* entityDescription = [NSEntityDescription entityForName:EntityNameFromClass(class) inManagedObjectContext:self.managedObjectContext];
+    NSEntityDescription* entityDescription = [self entityDescriptionForClass:class];
     return [entityDescription.properties valueForKey:@"name"];
 }
 
