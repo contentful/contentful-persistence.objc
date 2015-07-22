@@ -229,6 +229,9 @@
                         sectionWasReloaded[indexPath.section] = @YES;
                     }
                     break;
+
+                default:
+                    break;
             }
         }];
     }

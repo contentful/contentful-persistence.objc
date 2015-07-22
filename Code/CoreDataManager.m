@@ -254,8 +254,7 @@ NSString* EntityNameFromClass(Class class) {
     NSParameterAssert(class);
     
     NSFetchRequest *request = [NSFetchRequest new];
-    
-    NSManagedObjectContext *moc = [self managedObjectContext];
+
     NSEntityDescription *entityDescription = [self entityDescriptionForClass:class];
     [request setEntity:entityDescription];
     
@@ -347,15 +346,6 @@ NSString* EntityNameFromClass(Class class) {
         }
     }];
 
-    for (NSString* value in mapping.allValues) {
-        [self.client fetchContentTypeWithIdentifier:identifier success:^(CDAResponse *response,
-                                                                         CDAContentType *contentType) {
-            CDAField* field = [contentType fieldForIdentifier:value];
-
-
-        } failure:nil];
-    }
-
     return mapping;
 }
 
@@ -442,7 +432,7 @@ NSString* EntityNameFromClass(Class class) {
             NSAttributeDescription* attributeDescription = [self entityDescriptionForClass:persistedEntry.class].attributesByName[key];
 
             if (attributeDescription.attributeType != NSBinaryDataAttributeType) {
-                [NSException raise:NSInvalidArgumentException format:@"Invalid Core Data model: %@ needs to be of NSBinaryDataAttributeType."];
+                [NSException raise:NSInvalidArgumentException format:@"Invalid Core Data model: %@ needs to be of NSBinaryDataAttributeType.", attributeDescription.name];
             }
 
             NSArray* symbolArray = entry.fields[field.identifier];
@@ -506,7 +496,7 @@ NSString* EntityNameFromClass(Class class) {
     if (_managedObjectModel != nil) {
         return _managedObjectModel;
     }
-    NSURL *modelURL = [[NSBundle bundleForClass:[self class]]
+    NSURL *modelURL = [[NSBundle mainBundle]
                        URLForResource:self.dataModelName withExtension:@"momd"];
     _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     return _managedObjectModel;
