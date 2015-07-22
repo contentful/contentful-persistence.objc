@@ -496,7 +496,7 @@ NSString* EntityNameFromClass(Class class) {
     if (_managedObjectModel != nil) {
         return _managedObjectModel;
     }
-    NSURL *modelURL = [[NSBundle bundleForClass:[self class]]
+    NSURL *modelURL = [[NSBundle mainBundle]
                        URLForResource:self.dataModelName withExtension:@"momd"];
     _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     return _managedObjectModel;
