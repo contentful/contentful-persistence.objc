@@ -13,6 +13,7 @@
 #import <ContentfulDeliveryAPI/CDAEntry.h>
 #import <ContentfulDeliveryAPI/CDAField.h>
 
+#import "CDAUtilities.h"
 #import "CoreDataManager.h"
 
 NSString* EntityNameFromClass(Class class) {
@@ -148,7 +149,9 @@ NSString* EntityNameFromClass(Class class) {
         [self.client fetchContentTypeWithIdentifier:identifier success:^(CDAResponse *response,
                                                                          CDAContentType *contentType) {
             CDAField* field = [contentType fieldForIdentifier:key[1]];
-            block(contentType, field, keyPath);
+            if (field) {
+                block(contentType, field, keyPath);
+            }
         } failure:nil];
     }
 }
@@ -496,8 +499,16 @@ NSString* EntityNameFromClass(Class class) {
     if (_managedObjectModel != nil) {
         return _managedObjectModel;
     }
-    NSURL *modelURL = [[NSBundle mainBundle]
-                       URLForResource:self.dataModelName withExtension:@"momd"];
+
+    NSURL* modelURL = nil;
+    for (NSBundle* bundle in @[ [NSBundle mainBundle], [NSBundle bundleForClass:self.class] ]) {
+        modelURL = [bundle URLForResource:self.dataModelName withExtension:@"momd"];
+
+        if (modelURL) {
+            break;
+        }
+    }
+
     _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     return _managedObjectModel;
 }
