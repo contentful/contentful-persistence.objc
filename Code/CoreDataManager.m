@@ -68,6 +68,15 @@ NSString* EntityNameFromClass(Class class) {
 
 #pragma mark -
 
+- (id<CDAPersistedEntry>)createLocalizedPersistedEntryForContentTypeWithIdentifier:(NSString *)identifier {
+    Class entryClass = [self classForLocalizedEntriesOfContentTypeWithIdentifier:identifier];
+    if (!entryClass) {
+        return nil;
+    }
+    return [NSEntityDescription insertNewObjectForEntityForName:EntityNameFromClass(entryClass)
+                                         inManagedObjectContext:self.managedObjectContext];
+}
+
 - (id<CDAPersistedAsset>)createPersistedAsset
 {
     NSParameterAssert(self.classForAssets);
@@ -132,6 +141,12 @@ NSString* EntityNameFromClass(Class class) {
     id<CDAPersistedEntry> entry = [self fetchEntryWithIdentifier:identifier];
     
     if (entry) {
+        [self.managedObjectContext deleteObject:entry];
+    }
+}
+
+- (void)deleteLocalizedEntryWithIdentifier:(NSString *)identifier {
+    for (NSManagedObject* entry in [self fetchLocalizedEntriesWithIdentifier:identifier]) {
         [self.managedObjectContext deleteObject:entry];
     }
 }
@@ -211,6 +226,9 @@ NSString* EntityNameFromClass(Class class) {
 {
     NSFetchRequest *request = [self fetchRequestForEntititiesOfClass:class
                                                    matchingPredicate:predicateString];
+    if (!request) {
+        return nil;
+    }
     return [self.managedObjectContext executeFetchRequest:request error:error];
 }
 
@@ -251,6 +269,33 @@ NSString* EntityNameFromClass(Class class) {
     return [[self fetchEntriesMatchingPredicate:predicate] firstObject];
 }
 
+- (NSArray*)fetchLocalizedEntriesWithIdentifier:(NSString *)identifier {
+    NSString* predicate = [NSString stringWithFormat:@"identifier == '%@'", identifier];
+
+    NSError* error;
+    NSArray* entries = [self fetchEntititiesOfClass:[self classForLocalizedEntriesOfContentTypeWithIdentifier:identifier] matchingPredicate:predicate error:&error];
+
+    if (!entries) {
+        NSLog(@"Could not fetch entries: %@", error);
+    }
+
+    return entries;
+}
+
+- (id<CDALocalizedPersistedEntry>)fetchLocalizedEntryWithIdentifier:(NSString *)identifier
+                                                             locale:(NSString *)locale {
+    NSString* predicate = [NSString stringWithFormat:@"identifier == '%@' AND locale == '%@'", identifier, locale];
+
+    NSError* error;
+    NSArray* entries = [self fetchEntititiesOfClass:[self classForLocalizedEntriesOfContentTypeWithIdentifier:identifier] matchingPredicate:predicate error:&error];
+
+    if (!entries) {
+        NSLog(@"Could not fetch entries: %@", error);
+    }
+
+    return entries.firstObject;
+}
+
 - (NSFetchRequest *)fetchRequestForEntititiesOfClass:(Class)class
                                    matchingPredicate:(NSString*)predicateString
 {
@@ -259,6 +304,9 @@ NSString* EntityNameFromClass(Class class) {
     NSFetchRequest *request = [NSFetchRequest new];
 
     NSEntityDescription *entityDescription = [self entityDescriptionForClass:class];
+    if (!entityDescription) {
+        return nil;
+    }
     [request setEntity:entityDescription];
     
     if (predicateString) {
@@ -457,10 +505,13 @@ NSString* EntityNameFromClass(Class class) {
         id relationshipTarget = [entry valueForKeyPath:entryKeyPath];
 
         if (!relationshipTarget) {
+            [(NSObject*)persistedEntry setValue:nil forKey:relationshipName];
             return;
         }
 
         if ([relationshipTarget isKindOfClass:[NSArray class]]) {
+            NSAssert(description.toMany, @"Relationship cardinality mismatch: to-one locally, but to-many on Contentful.");
+
 			if (description.isOrdered) {
 				relationshipTarget = [NSOrderedSet orderedSetWithArray:relationshipTarget];
 			} else {
@@ -469,6 +520,7 @@ NSString* EntityNameFromClass(Class class) {
         } else {
             NSAssert([relationshipTarget isKindOfClass:[CDAResource class]],
                      @"Relationship target ought to be a Resource.");
+            NSAssert(!description.toMany, @"Relationship cardinality mismatch: to-many locally, but to-one on Contentful.");
         }
         
         relationships[relationshipName] = relationshipTarget;
