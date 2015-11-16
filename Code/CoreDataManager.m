@@ -445,11 +445,11 @@ NSString* EntityNameFromClass(Class class) {
 }
 
 - (id)resolveResource:(CDAResource*)rsc {
-    if ([rsc isKindOfClass:[CDAAsset class]]) {
+    if (CDAClassIsOfType([rsc class], CDAAsset.class)) {
         return [self fetchAssetWithIdentifier:rsc.identifier];
     }
 
-    if ([rsc isKindOfClass:[CDAEntry class]]) {
+    if (CDAClassIsOfType([rsc class], CDAEntry.class)) {
         return [self fetchEntryWithIdentifier:rsc.identifier];
     }
 
@@ -518,7 +518,7 @@ NSString* EntityNameFromClass(Class class) {
 				relationshipTarget = [NSSet setWithArray:relationshipTarget];
 			}
         } else {
-            NSAssert([relationshipTarget isKindOfClass:[CDAResource class]],
+            NSAssert(CDAClassIsOfType([relationshipTarget class], CDAResource.class),
                      @"Relationship target ought to be a Resource.");
             NSAssert(!description.toMany, @"Relationship cardinality mismatch: to-many locally, but to-one on Contentful.");
         }
