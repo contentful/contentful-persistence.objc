@@ -8,6 +8,7 @@
 
 @import CoreData;
 
+#import <ContentfulDeliveryAPI/CDAArray.h>
 #import <ContentfulDeliveryAPI/CDAAsset.h>
 #import <ContentfulDeliveryAPI/CDAContentType.h>
 #import <ContentfulDeliveryAPI/CDAEntry.h>
@@ -30,6 +31,7 @@ NSString* EntityNameFromClass(Class class) {
 
 @interface CoreDataManager ()
 
+@property (nonatomic) NSMutableDictionary* contentTypes;
 @property (nonatomic) NSString* dataModelName;
 @property (nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic) NSManagedObjectModel *managedObjectModel;
@@ -161,13 +163,12 @@ NSString* EntityNameFromClass(Class class) {
             continue;
         }
 
-        [self.client fetchContentTypeWithIdentifier:identifier success:^(CDAResponse *response,
-                                                                         CDAContentType *contentType) {
-            CDAField* field = [contentType fieldForIdentifier:key[1]];
-            if (field) {
-                block(contentType, field, keyPath);
-            }
-        } failure:nil];
+        CDAContentType* contentType = self.contentTypes[identifier];
+        NSAssert(contentType, @"No Content Type found for identifier '%@'.", identifier);
+        CDAField* field = [contentType fieldForIdentifier:key[1]];
+        if (field) {
+            block(contentType, field, keyPath);
+        }
     }
 }
 
@@ -343,6 +344,7 @@ NSString* EntityNameFromClass(Class class) {
     self = [super initWithClient:client];
     if (self) {
         NSParameterAssert(dataModelName);
+        self.contentTypes = [@{} mutableCopy];
         self.dataModelName = dataModelName;
     }
     return self;
@@ -355,6 +357,7 @@ NSString* EntityNameFromClass(Class class) {
     self = [super initWithClient:client query:query];
     if (self) {
         NSParameterAssert(dataModelName);
+        self.contentTypes = [@{} mutableCopy];
         self.dataModelName = dataModelName;
     }
     return self;
@@ -402,8 +405,14 @@ NSString* EntityNameFromClass(Class class) {
 
 - (void)performSynchronizationWithSuccess:(void (^)())success failure:(CDARequestFailureBlock)failure {
     self.relationshipsToResolve = [@{} mutableCopy];
-    
-    [super performSynchronizationWithSuccess:success failure:failure];
+
+    [self.client fetchContentTypesWithSuccess:^(CDAResponse* response, CDAArray* array) {
+        for (CDAContentType* contentType in array.items) {
+            self.contentTypes[contentType.identifier] = contentType;
+        }
+
+        [super performSynchronizationWithSuccess:success failure:failure];
+    } failure:failure];
 }
 
 - (NSRelationshipDescription*)relationshipDescriptionForName:(NSString*)relationshipName
