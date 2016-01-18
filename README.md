@@ -13,6 +13,8 @@ This library simplifies persisting data retrieved from the [Contentful][1] Conte
 contentful-persistence.objc is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
+    source 'https://github.com/contentful/CocoaPodsSpecs'
+
     pod "ContentfulPersistence"
 
 ## License
