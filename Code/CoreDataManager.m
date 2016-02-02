@@ -70,7 +70,7 @@ NSString* EntityNameFromClass(Class class) {
 
 #pragma mark -
 
-- (id<CDAPersistedEntry>)createLocalizedPersistedEntryForContentTypeWithIdentifier:(NSString *)identifier {
+- (id<CDALocalizedPersistedEntry>)createLocalizedPersistedEntryForContentTypeWithIdentifier:(NSString *)identifier {
     Class entryClass = [self classForLocalizedEntriesOfContentTypeWithIdentifier:identifier];
     if (!entryClass) {
         return nil;
@@ -485,7 +485,10 @@ NSString* EntityNameFromClass(Class class) {
 - (void)updatePersistedEntry:(id<CDAPersistedEntry>)persistedEntry withEntry:(CDAEntry *)entry {
     [super updatePersistedEntry:persistedEntry withEntry:entry];
 
-    NSDictionary* mappingForEntries = [super mappingForEntriesOfContentTypeWithIdentifier:entry.contentType.identifier];
+    NSString* contentTypeId = entry.contentType.identifier;
+    NSParameterAssert(contentTypeId);
+
+    NSDictionary*  mappingForEntries = [super mappingForEntriesOfContentTypeWithIdentifier:contentTypeId];
     [self enumerateMappedFieldsForContentTypeWithIdentifier:entry.contentType.identifier mapping:mappingForEntries usingBlock:^(CDAContentType *contentType, CDAField *field, NSString *keyPath) {
         if (field.type == CDAFieldTypeArray && field.itemType == CDAFieldTypeSymbol) {
             NSString* key = mappingForEntries[keyPath];

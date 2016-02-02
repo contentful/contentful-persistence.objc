@@ -214,7 +214,7 @@
     }];
 
     NSMutableArray* sectionWasReloaded = [@[] mutableCopy];
-    for (int i = 0; i < self.fetchedResultsController.sections.count; i++) {
+    for (unsigned long i = 0; i < self.fetchedResultsController.sections.count; i++) {
         [sectionWasReloaded addObject:@(NO)];
     }
 
@@ -231,7 +231,9 @@
                     }
                     break;
 
-                default:
+                case NSFetchedResultsChangeDelete:
+                case NSFetchedResultsChangeInsert:
+                case NSFetchedResultsChangeMove:
                     break;
             }
         }];
