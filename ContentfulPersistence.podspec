@@ -21,5 +21,5 @@ Pod::Spec.new do |s|
 
   s.osx.deployment_target     = '10.8'
 
-  s.dependency 'ContentfulDeliveryAPI', '~> 1.9.1'
+  s.dependency 'ContentfulDeliveryAPI', '~> 1.9.4'
 end

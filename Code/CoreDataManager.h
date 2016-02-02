@@ -71,6 +71,20 @@
 
 /** @name Managed Object Context */
 
+/**
+ *  Concurrency type of the underlying managed object context of the receiver.
+ *
+ *  Set to `NSMainQueueConcurrencyType` by default, can only be changed prior to the first access
+ *  of the data store. Set it to `NSConfinementConcurrencyType` for the behaviour of version 0.3.2 and
+ *  earlier.
+ *
+ *  If you are using `NSPrivateQueueConcurrencyType`, make sure that you use the `performBlock:` or
+ *  `performBlockAndWait:` methods of the management object context when accessing any data. See
+ *  <http://oleb.net/blog/2014/06/core-data-concurrency-debugging/> for some tips on debugging Core
+ *  Data concurrency issues.
+ */
+@property (nonatomic) NSManagedObjectContextConcurrencyType concurrencyType;
+
 /** The default managed object context of the receiver. */
 @property (nonatomic, readonly) NSManagedObjectContext *managedObjectContext;
 
