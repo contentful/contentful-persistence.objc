@@ -406,7 +406,11 @@ NSString* EntityNameFromClass(Class class) {
 }
 
 - (void)performBlock:(void (^)())block {
-    [self.managedObjectContext performBlock:block];
+    if (self.managedObjectContext.concurrencyType == NSConfinementConcurrencyType) {
+        [super performBlock:block];
+    } else {
+        [self.managedObjectContext performBlock:block];
+    }
 }
 
 - (void)performSynchronizationWithSuccess:(void (^)())success failure:(CDARequestFailureBlock)failure {
@@ -417,7 +421,7 @@ NSString* EntityNameFromClass(Class class) {
             self.contentTypes[contentType.identifier] = contentType;
         }
 
-        [self.managedObjectContext performBlock:^{
+        [self performBlock:^{
             [super performSynchronizationWithSuccess:success failure:failure];
         }];
     } failure:failure];
