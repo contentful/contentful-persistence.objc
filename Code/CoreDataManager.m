@@ -440,7 +440,17 @@ NSString* EntityNameFromClass(Class class) {
 }
 
 - (void)resolveRelationships {
+    NSMutableDictionary* assets = [@{} mutableCopy];
+    for (id<CDAPersistedAsset> asset in [self fetchAssetsFromDataStore]) {
+        assets[asset.identifier] = asset;
+    }
+
+    NSMutableDictionary* entries = [@{} mutableCopy];
     for (id<CDAPersistedEntry> entry in [self fetchEntriesFromDataStore]) {
+        entries[entry.identifier] = entry;
+    }
+
+    for (id<CDAPersistedEntry> entry in entries.allValues) {
         NSDictionary* relationships = self.relationshipsToResolve[entry.identifier];
         [relationships enumerateKeysAndObjectsUsingBlock:^(NSString* keyPath, id value, BOOL *s) {
             NSRelationshipDescription* description = [self relationshipDescriptionForName:keyPath entityClass:entry.class];
@@ -449,7 +459,7 @@ NSString* EntityNameFromClass(Class class) {
                 id resolvedSet = description.isOrdered ? [NSMutableOrderedSet new] : [NSMutableSet new];
 
                 for (CDAResource* resource in value) {
-                    id resolvedResource = [self resolveResource:resource];
+                    id resolvedResource = [self resolveResource:resource withAssets:assets entries:entries];
                     if (resolvedResource) {
                         [resolvedSet addObject:resolvedResource];
                     }
@@ -457,7 +467,7 @@ NSString* EntityNameFromClass(Class class) {
 
                 value = resolvedSet;
             } else {
-                value = [self resolveResource:value];
+                value = [self resolveResource:value withAssets:assets entries:entries];
             }
 
             [(NSObject*)entry setValue:value forKeyPath:keyPath];
@@ -465,13 +475,15 @@ NSString* EntityNameFromClass(Class class) {
     }
 }
 
-- (id)resolveResource:(CDAResource*)rsc {
+- (id)resolveResource:(CDAResource*)rsc
+           withAssets:(NSMutableDictionary*)assets
+              entries:(NSMutableDictionary*)entries {
     if (CDAClassIsOfType([rsc class], CDAAsset.class)) {
-        return [self fetchAssetWithIdentifier:rsc.identifier];
+        return assets[rsc.identifier];
     }
 
     if (CDAClassIsOfType([rsc class], CDAEntry.class)) {
-        return [self fetchEntryWithIdentifier:rsc.identifier];
+        return entries[rsc.identifier];
     }
 
     NSAssert(false, @"Unexpectly, %@ is neither an Asset nor an Entry.", rsc);
