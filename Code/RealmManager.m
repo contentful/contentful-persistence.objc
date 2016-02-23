@@ -14,6 +14,14 @@
 #import "RealmManager.h"
 #import "RealmSpace.h"
 
+static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
+    while (class1) {
+        if (class1 == class2) return YES;
+        class1 = class_getSuperclass(class1);
+    }
+    return NO;
+}
+
 @interface RealmManager ()
 
 @property (nonatomic, readonly) RLMRealm* currentRealm;
@@ -127,6 +135,19 @@
     }
 }
 
+-(NSDictionary *)mappingForEntriesOfContentTypeWithIdentifier:(NSString *)identifier {
+    NSMutableDictionary* mapping = [[super mappingForEntriesOfContentTypeWithIdentifier:identifier] mutableCopy];
+    NSArray* relationships = [self relationshipsForClass:[self classForEntriesOfContentTypeWithIdentifier:identifier]];
+
+    [mapping enumerateKeysAndObjectsUsingBlock:^(NSString* key, NSString* value, BOOL *stop) {
+        if ([relationships containsObject:value]) {
+            [mapping removeObjectForKey:key];
+        }
+    }];
+
+    return mapping;
+}
+
 -(void)performSynchronizationWithSuccess:(void (^)())success failure:(CDARequestFailureBlock)failure {
     self.relationshipsToResolve = [@{} mutableCopy];
 
@@ -152,9 +173,16 @@
                 continue;
             }
 
-            Class propClass = NSClassFromString(attrs[1]);
+            attrs = [attrs[1] componentsSeparatedByString:@"<"];
+            if (attrs.count < 1) {
+                continue;
+            }
 
-            if (class_getSuperclass(propClass) != RLMObject.class) {
+            Class propClass = NSClassFromString(attrs[0]);
+            BOOL propertyIsArray = CDAIsKindOfClass(propClass, RLMArray.class);
+            BOOL propertyIsObject = CDAIsKindOfClass(class_getSuperclass(propClass), RLMObject.class);
+
+            if (!propertyIsArray && !propertyIsObject) {
                 continue;
             }
 
@@ -184,7 +212,20 @@
         NSDictionary* relationships = self.relationshipsToResolve[entry.identifier];
 
         [relationships enumerateKeysAndObjectsUsingBlock:^(NSString* keyPath, id value, BOOL *s) {
-            value = [self resolveResource:value];
+            if ([value isKindOfClass:NSArray.class]) {
+                NSMutableArray* resolvedResources = [@[] mutableCopy];
+
+                for (id resource in value) {
+                    id resolvedResource = [self resolveResource:resource];
+                    if (resolvedResource) {
+                        [resolvedResources addObject:resolvedResource];
+                    }
+                }
+
+                value = [resolvedResources copy];
+            } else {
+                value = [self resolveResource:value];
+            }
 
             [(NSObject*)entry setValue:value forKeyPath:keyPath];
         }];
