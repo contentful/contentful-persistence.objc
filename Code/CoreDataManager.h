@@ -10,6 +10,39 @@
 
 #import <ContentfulDeliveryAPI/CDAPersistenceManager.h>
 
+@class CoreDataManager;
+
+/**
+ * Delegate protocol for providing customization of certain behaviours of `CoreDataManager`.
+ */
+@protocol CoreDataManagerDelegate <NSObject>
+
+@optional
+
+/**
+ *  Called when adding a persistent store to the persistent store coordinator fails.
+ *
+ *  If not implemented, `CoreDataManager` will log the error to the console and `abort`.
+ *
+ *  @param dataManager The data manager which encountered the given error.
+ *  @param error       The concrete error which occured.
+ */
+-(void)dataManager:(CoreDataManager*)dataManager didFailAddingStoreWithError:(NSError*)error;
+
+/**
+ *  Called when saving a managed object context fails.
+ *
+ *  If not implemented, `CoreDataManager` will log the error to the console and `abort`.
+ *
+ *  @param dataManager The data manager which encountered the given error.
+ *  @param error       The concrete error which occured.
+ */
+-(void)dataManager:(CoreDataManager*)dataManager didFailSavingStoreWithError:(NSError*)error;
+
+@end
+
+#pragma mark -
+
 /**
  *  A specialization of `CDAPersistenceManager` which allows you to use Core Data.
  *
@@ -68,6 +101,11 @@
  */
 -(NSFetchRequest*)fetchRequestForEntriesOfContentTypeWithIdentifier:(NSString*)identifier
                                                   matchingPredicate:(NSString*)predicate;
+
+/** @name Customizing Behaviour */
+
+/** Delegate for providing custom error handling. */
+@property (nonatomic, weak) id<CoreDataManagerDelegate> delegate;
 
 /** @name Managed Object Context */
 
