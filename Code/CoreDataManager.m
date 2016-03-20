@@ -18,15 +18,9 @@
 #import "CoreDataManager.h"
 
 NSString* EntityNameFromClass(Class class) {
-    NSString* entityName = NSStringFromClass(class);
+    NSString* className = NSStringFromClass(class);
 
-    if ([entityName rangeOfString:@"."].location != NSNotFound) {
-        NSArray* components = [entityName componentsSeparatedByString:@"."];
-        NSCAssert(components.count == 2, @"Unexpected entity class name: %@", entityName);
-        entityName = components[1];
-    }
-
-    return entityName;
+    return [className componentsSeparatedByString:@"."].last;
 }
 
 @interface CoreDataManager ()
