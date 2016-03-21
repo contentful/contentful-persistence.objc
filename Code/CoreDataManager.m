@@ -20,7 +20,7 @@
 NSString* EntityNameFromClass(Class class) {
     NSString* className = NSStringFromClass(class);
 
-    return [className componentsSeparatedByString:@"."].last;
+    return [className componentsSeparatedByString:@"."].lastObject;
 }
 
 @interface CoreDataManager ()
