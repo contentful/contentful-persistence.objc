@@ -126,6 +126,12 @@
 /** The default managed object context of the receiver. */
 @property (nonatomic, readonly) NSManagedObjectContext *managedObjectContext;
 
+/** The managed object model used by the receiver. */
+@property (nonatomic, readonly) NSManagedObjectModel *managedObjectModel;
+
+/** The persistent store coordinator used by the receiver. */
+@property (nonatomic, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
 /** @name Testing Support */
 
 /** 
