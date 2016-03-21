@@ -613,8 +613,32 @@ NSString* EntityNameFromClass(Class class) {
     if (_persistentStoreCoordinator != nil) {
         return _persistentStoreCoordinator;
     }
-    
+
     NSError *error = nil;
+
+    if ([[NSFileManager defaultManager] fileExistsAtPath:self.storeURL.path isDirectory:nil]) {
+        NSDictionary* metadata = [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType
+                                                                                            URL:self.storeURL
+                                                                                          error:&error];
+
+        if (!metadata) {
+            if ([self.delegate respondsToSelector:@selector(dataManager:didFailAddingStoreWithError:)]) {
+                [self.delegate dataManager:self didFailAddingStoreWithError:error];
+            } else {
+                NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+                abort();
+            }
+        }
+
+        if (![self.managedObjectModel isConfiguration:nil compatibleWithStoreMetadata:metadata]) {
+            if ([self.delegate respondsToSelector:@selector(dataManager:handleMigrationWithMetadata:)]) {
+                [self.delegate dataManager:self handleMigrationWithMetadata:metadata];
+            } else {
+                [self deleteAll];
+            }
+        }
+    }
+
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc]
                                    initWithManagedObjectModel:[self managedObjectModel]];
     if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType

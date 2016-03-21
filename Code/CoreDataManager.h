@@ -39,6 +39,17 @@
  */
 -(void)dataManager:(CoreDataManager*)dataManager didFailSavingStoreWithError:(NSError*)error;
 
+/**
+ *  Called when the model of data on disk diverges from the one being used.
+ *
+ *  By default, all persisted data will be deleted, causing a resync of all data. If you want to instead
+ *  perform a custom migration, implement this method in your delegate.
+ *
+ *  @param dataManager The data manager which encountered the incompatible model.
+ *  @param metadata    Metadata of the persistent store being used.
+ */
+-(void)dataManager:(CoreDataManager*)dataManager handleMigrationWithMetadata:(NSDictionary*)metadata;
+
 @end
 
 #pragma mark -
