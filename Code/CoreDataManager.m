@@ -608,6 +608,15 @@ NSString* EntityNameFromClass(Class class) {
     return _managedObjectModel;
 }
 
+- (void)handlePersistentStoreError:(NSError*)error {
+    if ([self.delegate respondsToSelector:@selector(dataManager:didFailAddingStoreWithError:)]) {
+        [self.delegate dataManager:self didFailAddingStoreWithError:error];
+    } else {
+        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+        abort();
+    }
+}
+
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator
 {
     if (_persistentStoreCoordinator != nil) {
@@ -622,19 +631,18 @@ NSString* EntityNameFromClass(Class class) {
                                                                                           error:&error];
 
         if (!metadata) {
-            if ([self.delegate respondsToSelector:@selector(dataManager:didFailAddingStoreWithError:)]) {
-                [self.delegate dataManager:self didFailAddingStoreWithError:error];
-            } else {
-                NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-                abort();
-            }
+            [self handlePersistentStoreError:error];
+            return nil;
         }
 
         if (![self.managedObjectModel isConfiguration:nil compatibleWithStoreMetadata:metadata]) {
             if ([self.delegate respondsToSelector:@selector(dataManager:handleMigrationWithMetadata:)]) {
                 [self.delegate dataManager:self handleMigrationWithMetadata:metadata];
             } else {
-                [self deleteAll];
+                if (![[NSFileManager defaultManager] removeItemAtURL:self.storeURL error:&error]) {
+                    [self handlePersistentStoreError:error];
+                    return nil;
+                }
             }
         }
     }
@@ -646,12 +654,8 @@ NSString* EntityNameFromClass(Class class) {
                                                              URL:self.storeURL
                                                          options:nil
                                                            error:&error]) {
-        if ([self.delegate respondsToSelector:@selector(dataManager:didFailAddingStoreWithError:)]) {
-            [self.delegate dataManager:self didFailAddingStoreWithError:error];
-        } else {
-            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-            abort();
-        }
+        [self handlePersistentStoreError:error];
+        return nil;
     }
     
     return _persistentStoreCoordinator;
