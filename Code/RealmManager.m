@@ -69,7 +69,7 @@ static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
 
 -(void)deleteAssetWithIdentifier:(NSString *)identifier {
     NSPredicate* predicate = [self predicateWithIdentifier:identifier];
-    [self.currentRealm deleteObjects:[RealmAsset objectsWithPredicate:predicate]];
+    [self.currentRealm deleteObjects:[self.classForAssets objectsWithPredicate:predicate]];
 }
 
 -(void)deleteEntryWithIdentifier:(NSString *)identifier {
@@ -82,14 +82,14 @@ static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
 
 -(NSArray *)fetchAssetsFromDataStore {
     NSMutableArray* assets = [@[] mutableCopy];
-    for (RealmAsset* asset in [RealmAsset allObjects]) {
+    for (id asset in [self.classForAssets allObjects]) {
         [assets addObject:asset];
     }
     return [assets copy];
 }
 
 -(id<CDAPersistedAsset>)fetchAssetWithIdentifier:(NSString *)identifier {
-    return [RealmAsset objectsWithPredicate:[self predicateWithIdentifier:identifier]].firstObject;
+    return [self.classForAssets objectsWithPredicate:[self predicateWithIdentifier:identifier]].firstObject;
 }
 
 -(NSArray *)fetchEntriesFromDataStore {
@@ -119,7 +119,7 @@ static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
 }
 
 -(id<CDAPersistedSpace>)fetchSpaceFromDataStore {
-    return [RealmSpace allObjects].firstObject;
+    return [self.classForSpaces allObjects].firstObject;
 }
 
 -(void)forEachEntryClassDo:(void (^)(Class entryClass))entryClassHandler {
