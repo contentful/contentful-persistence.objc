@@ -159,6 +159,12 @@ static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
     return [NSPredicate predicateWithFormat:@"identifier = %@", identifier];
 }
 
+- (NSArray *)propertiesForEntriesOfContentTypeWithIdentifier:(NSString *)identifier {
+    Class class = [self classForEntriesOfContentTypeWithIdentifier:identifier];
+    RLMObjectSchema* schema = [[[class allObjects] firstObject] objectSchema];
+    return [schema.properties valueForKey:@"name"];
+}
+
 -(NSArray*)relationshipsForClass:(Class)clazz {
     unsigned int propCount = 0;
     objc_property_t* props = class_copyPropertyList(clazz, &propCount);
