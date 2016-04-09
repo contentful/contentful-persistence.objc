@@ -166,37 +166,16 @@ static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
 }
 
 -(NSArray*)relationshipsForClass:(Class)clazz {
-    unsigned int propCount = 0;
-    objc_property_t* props = class_copyPropertyList(clazz, &propCount);
-
     NSMutableArray* relationships = [@[] mutableCopy];
 
-    for (unsigned int i = 0; i < propCount; i++) {
-        NSString* attributes = [[NSString alloc] initWithUTF8String:property_getAttributes(props[i])];
-        if ([attributes hasPrefix:@"T@"]) {
-            NSArray* attrs = [attributes componentsSeparatedByString:@"\""];
-            if (attrs.count != 3) {
-                continue;
-            }
-
-            attrs = [attrs[1] componentsSeparatedByString:@"<"];
-            if (attrs.count < 1) {
-                continue;
-            }
-
-            Class propClass = NSClassFromString(attrs[0]);
-            BOOL propertyIsArray = CDAIsKindOfClass(propClass, RLMArray.class);
-            BOOL propertyIsObject = CDAIsKindOfClass(class_getSuperclass(propClass), RLMObject.class);
-
-            if (!propertyIsArray && !propertyIsObject) {
-                continue;
-            }
-
-            [relationships addObject:[[NSString alloc] initWithUTF8String:property_getName(props[i])]];
+    RLMObjectSchema* schema = [[[clazz allObjects] firstObject] objectSchema];
+    NSMutableArray* properties = [schema.properties mutableCopy];
+    for (RLMProperty* property in schema.properties) {
+        if (property.type == RLMPropertyTypeObject || property.type == RLMPropertyTypeArray) {
+            [relationships addObject:property.name];
         }
     }
 
-    free(props);
     return relationships;
 }
 
