@@ -14,14 +14,6 @@
 #import "RealmManager.h"
 #import "RealmSpace.h"
 
-static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
-    while (class1) {
-        if (class1 == class2) return YES;
-        class1 = class_getSuperclass(class1);
-    }
-    return NO;
-}
-
 @interface RealmManager ()
 
 @property (nonatomic, readonly) RLMRealm* currentRealm;
@@ -169,7 +161,6 @@ static inline BOOL CDAIsKindOfClass(Class class1, Class class2) {
     NSMutableArray* relationships = [@[] mutableCopy];
 
     RLMObjectSchema* schema = [[[clazz allObjects] firstObject] objectSchema];
-    NSMutableArray* properties = [schema.properties mutableCopy];
     for (RLMProperty* property in schema.properties) {
         if (property.type == RLMPropertyTypeObject || property.type == RLMPropertyTypeArray) {
             [relationships addObject:property.name];
