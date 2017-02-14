@@ -128,7 +128,7 @@ NSString* EntityNameFromClass(Class class) {
     id<CDAPersistedAsset> asset = [self fetchAssetWithIdentifier:identifier];
     
     if (asset) {
-        [self.managedObjectContext deleteObject:asset];
+        [self.managedObjectContext deleteObject:(NSManagedObject *)asset];
     }
 }
 
@@ -137,7 +137,7 @@ NSString* EntityNameFromClass(Class class) {
     id<CDAPersistedEntry> entry = [self fetchEntryWithIdentifier:identifier];
     
     if (entry) {
-        [self.managedObjectContext deleteObject:entry];
+        [self.managedObjectContext deleteObject:(NSManagedObject *)entry];
     }
 }
 
