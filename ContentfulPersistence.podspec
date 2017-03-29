@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 Pod::Spec.new do |s|
   s.name             = "ContentfulPersistence"
   s.version          = "0.7.0"
@@ -25,7 +27,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'Realm' do |ss|
-    ss.dependency 'Realm', '~> 1.0.0'
+    ss.dependency 'Realm', '~> 2.5.0'
 
     ss.source_files = 'Code/Realm*.{h,m}'
 
