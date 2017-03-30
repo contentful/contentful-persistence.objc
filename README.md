@@ -1,8 +1,8 @@
 # contentful-persistence.objc
 
-[![Version](https://img.shields.io/cocoapods/v/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/contentful-persistence.objc)
-[![License](https://img.shields.io/cocoapods/l/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/contentful-persistence.objc)
-[![Platform](https://img.shields.io/cocoapods/p/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/contentful-persistence.objc)
+[![Version](https://img.shields.io/cocoapods/v/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/ContentfulPersistenceObjC)
+[![License](https://img.shields.io/cocoapods/l/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/ContentfulPersistenceObjC)
+[![Platform](https://img.shields.io/cocoapods/p/contentful-persistence.objc.svg?style=flat)](http://cocoadocs.org/docsets/ContentfulPersistenceObjC)
 
 This library simplifies persisting data retrieved from the [Contentful][1] Content Delivery API.
 
