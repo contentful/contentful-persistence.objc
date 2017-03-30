@@ -11,4 +11,12 @@
 
 @interface RealmAsset : RLMObject <CDAPersistedAsset>
 
+
+#pragma mark - <CDAPersistedAsset>
+
+/** The description of the Asset. */
+@property (nonatomic, nullable) NSString* assetDescription;
+/** The title of the Asset. */
+@property (nonatomic, nullable) NSString* title;
+
 @end

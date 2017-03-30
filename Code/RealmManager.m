@@ -39,7 +39,7 @@
 
 -(id<CDAPersistedAsset>)createPersistedAsset {
     id<CDAPersistedAsset> asset = [super createPersistedAsset];
-    [self.currentRealm addObject:asset];
+    [self.currentRealm addObject:(RealmAsset *)asset];
     return asset;
 }
 
@@ -47,7 +47,7 @@
     id<CDAPersistedEntry> entry = [super createPersistedEntryForContentTypeWithIdentifier:identifier];
 
     if (entry) {
-        [self.currentRealm addObject:entry];
+        [self.currentRealm addObject:(RLMObject *)entry];
     }
     
     return entry;
@@ -55,7 +55,7 @@
 
 -(id<CDAPersistedSpace>)createPersistedSpace {
     id<CDAPersistedSpace> space = [super createPersistedSpace];
-    [self.currentRealm addObject:space];
+    [self.currentRealm addObject:(RealmSpace *)space];
     return space;
 }
 
