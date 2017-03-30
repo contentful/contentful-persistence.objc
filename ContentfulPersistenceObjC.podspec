@@ -1,8 +1,8 @@
 #!/usr/bin/ruby
 
 Pod::Spec.new do |s|
-  s.name             = "ContentfulPersistence"
-  s.version          = "0.7.1"
+  s.name             = "ContentfulPersistenceObjC"
+  s.version          = "1.0.0"
   s.summary          = "Simplified persistence for the Contentful iOS SDK."
   s.homepage         = "https://github.com/contentful/contentful-persistence.objc"
   s.license          = 'MIT'
