@@ -2,7 +2,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "ContentfulPersistenceObjC"
-  s.version          = "1.0.0"
+  s.version          = "2.0.0"
   s.summary          = "Simplified persistence for the Contentful iOS SDK."
   s.homepage         = "https://github.com/contentful/contentful-persistence.objc"
   s.license          = 'MIT'
@@ -16,14 +16,14 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '8.0'
   s.osx.deployment_target = '10.10'
 
-  s.dependency 'ContentfulDeliveryAPI', '~> 2.0.1'
+  s.dependency 'ContentfulDeliveryAPI', '~> 2.0.3'
 
   s.default_subspecs = 'CoreData'
 
   s.subspec 'CoreData' do |ss|
     ss.frameworks         = 'CoreData'
     ss.source_files       = 'Code/CoreData*.{h,m}'
-    ss.ios.source_files   = 'Code/UIKit'
+    ss.ios.source_files   = 'Code/UIKit/*.{h,m}'
   end
 
   s.subspec 'Realm' do |ss|
