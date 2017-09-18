@@ -400,7 +400,7 @@ NSString* EntityNameFromClass(Class class) {
 }
 
 - (void)performBlock:(void (^)())block {
-    if (self.managedObjectContext.concurrencyType == NSConfinementConcurrencyType) {
+    if (self.managedObjectContext.concurrencyType == NSPrivateQueueConcurrencyType) {
         [super performBlock:block];
     } else {
         [self.managedObjectContext performBlock:block];
@@ -625,11 +625,11 @@ NSString* EntityNameFromClass(Class class) {
 
     NSError *error = nil;
 
-    if ([[NSFileManager defaultManager] fileExistsAtPath:self.storeURL.path isDirectory:nil]) {
-        NSDictionary* metadata = [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType
+    if ([[NSFileManager defaultManager] fileExistsAtPath:(NSString *_Nonnull)self.storeURL.path isDirectory:nil]) {
+        NSDictionary *metadata = [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType
                                                                                             URL:self.storeURL
+                                                                                        options:nil
                                                                                           error:&error];
-
         if (!metadata) {
             [self handlePersistentStoreError:error];
             return nil;
