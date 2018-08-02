@@ -1,8 +1,9 @@
-# contentful-persistence.objc
+# This project is now deprecated. To easily persist Contentful data to CoreData, see [contentful-persistence.swift](https://github.com/contentful/contentful-persistence.swift)
 
-[![Version](https://img.shields.io/cocoapods/v/ContentfulPersistenceObjC.svg?style=flat)](http://cocoadocs.org/docsets/ContentfulPersistenceObjC)
-[![License](https://img.shields.io/cocoapods/l/ContentfulPersistenceObjC.svg?style=flat)](http://cocoadocs.org/docsets/ContentfulPersistenceObjC)
-[![Platform](https://img.shields.io/cocoapods/p/ContentfulPersistenceObjC.svg?style=flat)](http://cocoadocs.org/docsets/ContentfulPersistenceObjC)
+
+
+## contentful-persistence.objc
+
 
 This library simplifies persisting data retrieved from the [Contentful][1] Content Delivery API.
 
